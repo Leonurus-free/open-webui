@@ -143,7 +143,7 @@
 	};
 
 	const shareModelHandler = async (model) => {
-		toast.success($i18n.t('Redirecting you to Open WebUI Community'));
+		toast.success($i18n.t('Redirecting you to 沧澜问答 Community'));
 
 		const url = 'https://openwebui.com';
 
@@ -658,7 +658,7 @@
 	{#if $config?.features.enable_community_sharing}
 		<div class=" my-16">
 			<div class=" text-xl font-medium mb-1 line-clamp-1">
-				{$i18n.t('Made by Open WebUI Community')}
+				{$i18n.t('Made by 沧澜问答 Community')}
 			</div>
 
 			<a

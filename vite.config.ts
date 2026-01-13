@@ -16,6 +16,13 @@ export default defineConfig({
 			]
 		})
 	],
+	server: {
+		port: 7001,  // 修改这里改变端口，例如改成 3000
+		host: true,   // 允许外部访问
+		watch: {
+			ignored: ['**/backend/**', '**/node_modules/**']
+		}
+	},
 	define: {
 		APP_VERSION: JSON.stringify(process.env.npm_package_version),
 		APP_BUILD_HASH: JSON.stringify(process.env.APP_BUILD_HASH || 'dev-build')

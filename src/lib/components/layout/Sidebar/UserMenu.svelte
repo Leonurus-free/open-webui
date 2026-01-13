@@ -284,8 +284,8 @@
 
 				<!-- {$i18n.t('Help')} -->
 
-				{#if $user?.role === 'admin'}
-					<DropdownMenu.Item
+				<!-- {#if $user?.role === 'admin'} -->
+					<!-- <DropdownMenu.Item
 						as="a"
 						target="_blank"
 						class="flex gap-3 items-center py-1.5 px-3 text-sm select-none w-full cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 rounded-xl transition"
@@ -297,10 +297,10 @@
 					>
 						<QuestionMarkCircle className="size-5" />
 						<div class="flex items-center">{$i18n.t('Documentation')}</div>
-					</DropdownMenu.Item>
+					</DropdownMenu.Item> -->
 
 					<!-- Releases -->
-					<DropdownMenu.Item
+					<!-- <DropdownMenu.Item
 						as="a"
 						target="_blank"
 						class="flex gap-3 items-center py-1.5 px-3 text-sm select-none w-full cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 rounded-xl transition"
@@ -312,8 +312,8 @@
 					>
 						<Map className="size-5" />
 						<div class="flex items-center">{$i18n.t('Releases')}</div>
-					</DropdownMenu.Item>
-				{/if}
+					</DropdownMenu.Item> -->
+				<!-- {/if} -->
 
 				<DropdownMenu.Item
 					class="flex gap-3 items-center py-1.5 px-3 text-sm select-none w-full  hover:bg-gray-50 dark:hover:bg-gray-800 rounded-xl transition cursor-pointer"

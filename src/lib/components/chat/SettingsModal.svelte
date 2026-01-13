@@ -487,6 +487,11 @@
 				);
 			}
 
+			// Only show 'About' tab to admin users
+			if (tab.id === 'about') {
+				return $user?.role === 'admin';
+			}
+
 			return true;
 		});
 	};
