@@ -1,4 +1,4 @@
-"""OpenTelemetry metrics bootstrap for 沧澜问答.
+"""OpenTelemetry metrics bootstrap for Open WebUI.
 
 This module initialises a MeterProvider that sends metrics to an OTLP
 collector. The collector is responsible for exposing a Prometheus
@@ -141,9 +141,12 @@ def setup_metrics(app: FastAPI, resource: Resource) -> None:
     def observe_total_registered_users(
         options: metrics.CallbackOptions,
     ) -> Sequence[metrics.Observation]:
+        # IMPORTANT: Use get_num_users() for efficient COUNT(*) query.
+        # Do NOT use len(get_users()["users"]) - it loads ALL user records into memory,
+        # causing connection pool exhaustion on high-latency databases (e.g., Aurora).
         return [
             metrics.Observation(
-                value=len(Users.get_users()["users"]),
+                value=Users.get_num_users() or 0,
             )
         ]
 
