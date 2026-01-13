@@ -111,7 +111,7 @@
 							{$i18n.t('Connect to your own OpenAPI compatible external tool servers.')}
 							<br />
 							{$i18n.t(
-								'CORS must be properly configured by the provider to allow requests from 沧澜问答.'
+								'CORS must be properly configured by the provider to allow requests from 灵枢Agent.'
 							)}
 						</div>
 					</div>

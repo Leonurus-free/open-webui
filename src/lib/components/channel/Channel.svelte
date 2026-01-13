@@ -284,10 +284,10 @@
 					} else {
 						return e.name;
 					}
-				}, '')} • 沧澜问答</title
+				}, '')} • 灵枢Agent</title
 		>
 	{:else}
-		<title>#{channel?.name ?? 'Channel'} • 沧澜问答</title>
+		<title>#{channel?.name ?? 'Channel'} • 灵枢Agent</title>
 	{/if}
 </svelte:head>
 

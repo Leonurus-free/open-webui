@@ -31,7 +31,7 @@
 		const _chat = chat.chat;
 		console.log('share', _chat);
 
-		toast.success($i18n.t('Redirecting you to 沧澜问答 Community'));
+		toast.success($i18n.t('Redirecting you to 灵枢Agent Community'));
 		const url = 'https://openwebui.com';
 		// const url = 'http://localhost:5173';
 
@@ -135,7 +135,7 @@
 										show = false;
 									}}
 								>
-									{$i18n.t('Share to 沧澜问答 Community')}
+									{$i18n.t('Share to 灵枢Agent Community')}
 								</button>
 							{/if}
 

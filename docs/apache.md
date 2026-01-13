@@ -2,7 +2,7 @@
 
 Sometimes, it's beneficial to host Ollama, separate from the UI, but retain the RAG and RBAC support features shared across users:
 
-# 沧澜问答 Configuration
+# 灵枢Agent Configuration
 
 ## UI Configuration
 

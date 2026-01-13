@@ -1,6 +1,6 @@
 [project]
 name = "open-webui"
-description = "沧澜问答"
+description = "灵枢Agent"
 authors = [
     { name = "Timothy Jaeryang Baek", email = "tim@openwebui.com" }
 ]

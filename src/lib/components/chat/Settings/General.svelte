@@ -250,7 +250,7 @@
 						href="https://github.com/open-webui/open-webui/blob/main/docs/CONTRIBUTING.md#-translations-and-internationalization"
 						target="_blank"
 					>
-						Help us translate 沧澜问答!
+						Help us translate 灵枢Agent!
 					</a>
 				</div>
 			{/if}

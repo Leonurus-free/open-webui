@@ -97,7 +97,7 @@
 	};
 
 	const shareHandler = async () => {
-		toast.success($i18n.t('Redirecting you to 沧澜问答 Community'));
+		toast.success($i18n.t('Redirecting you to 灵枢Agent Community'));
 
 		// remove snapshot from feedbacks
 		const feedbacksToShare = feedbacks.map((f) => {

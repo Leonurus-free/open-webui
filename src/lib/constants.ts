@@ -1,7 +1,7 @@
 import { browser, dev } from '$app/environment';
 // import { version } from '../../package.json';
 
-export const APP_NAME = '沧澜问答';
+export const APP_NAME = '灵枢Agent';
 
 export const WEBUI_HOSTNAME = browser ? (dev ? `${location.hostname}:15700` : ``) : '';
 export const WEBUI_BASE_URL = browser ? (dev ? `http://${WEBUI_HOSTNAME}` : ``) : ``;

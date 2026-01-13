@@ -652,14 +652,14 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(
-    title="Open WebUI",
+    title="灵枢Agent",
     docs_url="/docs" if ENV == "dev" else None,
     openapi_url="/openapi.json" if ENV == "dev" else None,
     redoc_url=None,
     lifespan=lifespan,
 )
 
-# For Open WebUI OIDC/OAuth2
+# For 灵枢Agent OIDC/OAuth2
 oauth_manager = OAuthManager(app)
 app.state.oauth_manager = oauth_manager
 
@@ -1392,10 +1392,15 @@ async def inspect_websocket(request: Request, call_next):
     return await call_next(request)
 
 
+# CORS 配置：允许跨域请求
+# allow_credentials=False: 禁用凭据模式，允许使用通配符 '*' 作为 allow_origins
+# 注意：设置为 False 后，请求不会携带 cookies、HTTP 认证或客户端 SSL 证书
+# 如果需要携带凭据，必须将 allow_credentials 设置为 True，
+# 并且 allow_origins 不能使用通配符，需要指定具体的域名列表
 app.add_middleware(
     CORSMiddleware,
     allow_origins=CORS_ALLOW_ORIGIN,
-    allow_credentials=True,
+    allow_credentials=False,  # 禁用凭据模式以允许通配符源
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -2105,7 +2110,7 @@ async def get_app_changelog():
 @app.get("/api/usage")
 async def get_current_usage(user=Depends(get_verified_user)):
     """
-    Get current usage statistics for Open WebUI.
+    Get current usage statistics for 灵枢Agent.
     This is an experimental endpoint and subject to change.
     """
     try:
