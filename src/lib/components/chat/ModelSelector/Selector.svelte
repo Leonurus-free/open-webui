@@ -66,6 +66,36 @@
 	let selectedModel = '';
 	$: selectedModel = items.find((item) => item.value === value) ?? '';
 
+	// ========== 自定义功能：模型使用量状态显示 START ==========
+	// 添加日期: 2026-01-15
+	// 功能说明: 根据模型的 token_usage 字段显示模型状态（空闲/繁忙）
+	//
+	// 使用说明:
+	// 1. 后端 API (/api/models) 返回的模型数据中可能包含 token_usage 字段
+	// 2. token_usage 是一个 0-1 之间的小数，表示模型的使用量百分比
+	// 3. 根据使用量显示状态：
+	//    - token_usage < 0.6 (60%)：显示"空闲"标签（绿色）
+	//    - token_usage >= 0.6 (60%)：显示"繁忙"标签（红色）
+	// 4. 如果模型没有 token_usage 字段，则不显示状态标签
+	//
+	// 测试模式说明:
+	// - ENABLE_TEST_MODE = true：为没有 token_usage 字段的模型添加测试值 0.45
+	// - ENABLE_TEST_MODE = false：只显示真实的 token_usage 数据
+	// - 当后端真正返回 token_usage 字段后，将 ENABLE_TEST_MODE 改为 false
+	//
+	const ENABLE_TEST_MODE = true; // 设置为 false 可关闭测试模式
+	$: selectedModelTokenUsage = (() => {
+		if (!selectedModel) return undefined;
+		const realValue = selectedModel.model?.token_usage;
+		// 如果有真实值，直接使用
+		if (realValue !== undefined && realValue !== null) {
+			return realValue;
+		}
+		// 测试模式：只为测试添加假数据，生产环境下如果没有字段则返回 undefined
+		return ENABLE_TEST_MODE ? 0.45 : undefined;
+	})();
+	// ========== 自定义功能：模型使用量状态显示 END ==========
+
 	let searchValue = '';
 
 	let selectedTag = '';
@@ -381,7 +411,7 @@
 		id="model-selector-{id}-button"
 	>
 		<div
-			class="flex w-full text-left px-0.5 bg-transparent truncate {triggerClassName} justify-between {($settings?.highContrastMode ??
+			class="flex items-center w-full text-left px-0.5 bg-transparent truncate {triggerClassName} justify-between {($settings?.highContrastMode ??
 			false)
 				? 'dark:placeholder-gray-100 placeholder-gray-800'
 				: 'placeholder-gray-400'}"
@@ -395,7 +425,38 @@
 			}}
 		>
 			{#if selectedModel}
-				{selectedModel.label}
+				<span class="truncate">{selectedModel.label}</span>
+				<!-- ========== 自定义功能：显示模型状态标签 START ========== -->
+				<!-- 功能说明: 在选中的模型名称后面显示状态标签（空闲/繁忙） -->
+				<!-- 显示条件: 只有当 selectedModelTokenUsage 有值时才显示 -->
+				<!-- 状态判断:
+					- token_usage < 0.6 (60%)：显示"空闲"，绿色背景和文字
+					- token_usage >= 0.6 (60%)：显示"繁忙"，红色背景和文字
+				-->
+				<!-- 兼容性说明:
+					- 使用内联样式 + rgb() 颜色值以支持老版本浏览器（如 Chrome 106）
+					- 避免使用 Tailwind 的透明度语法（/30）以提高兼容性
+				-->
+				{#if selectedModelTokenUsage !== undefined && selectedModelTokenUsage !== null}
+					{#if selectedModelTokenUsage < 0.6}
+						<!-- 空闲状态：绿色标签 -->
+						<span
+							class="ml-2 px-1.5 py-0.5 text-xs font-medium rounded"
+							style="background-color: rgb(220, 252, 231); color: rgb(21, 128, 61);"
+						>
+							空闲
+						</span>
+					{:else}
+						<!-- 繁忙状态：红色标签 -->
+						<span
+							class="ml-2 px-1.5 py-0.5 text-xs font-medium rounded"
+							style="background-color: rgb(254, 226, 226); color: rgb(185, 28, 28);"
+						>
+							繁忙
+						</span>
+					{/if}
+				{/if}
+				<!-- ========== 自定义功能：显示模型状态标签 END ========== -->
 			{:else}
 				{placeholder}
 			{/if}

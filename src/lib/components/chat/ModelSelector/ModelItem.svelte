@@ -41,22 +41,71 @@
 	};
 
 	let showMenu = false;
+
+	// ========== 自定义功能：模型使用量进度条显示 START ==========
+	// 添加日期: 2026-01-15
+	// 功能说明: 在模型下拉列表中，为每个模型条目显示使用量进度条背景
+	//
+	// 使用说明:
+	// 1. 后端 API (/api/models) 返回的模型数据中可能包含 token_usage 字段
+	// 2. token_usage 是一个 0-1 之间的小数，表示模型的使用量百分比
+	// 3. 进度条效果：整个模型条目会有一个从左到右的渐变背景填充
+	// 4. 填充宽度根据 token_usage 值动态变化（0-100%）
+	// 5. 如果模型没有 token_usage 字段，则不显示进度条背景
+	//
+	// 测试模式说明:
+	// - ENABLE_TEST_MODE = true：为所有模型生成测试进度条（根据索引计算）
+	// - ENABLE_TEST_MODE = false：只显示真实的 token_usage 数据
+	// - 当后端真正返回 token_usage 字段后，将 ENABLE_TEST_MODE 改为 false
+	// - 测试值计算公式: (index * 0.13) % 0.9，会生成 0-90% 之间的不同值
+	//
+	const ENABLE_TEST_MODE = true; // 设置为 false 可关闭测试模式
+	$: displayTokenUsage = ENABLE_TEST_MODE
+		? (item.model.token_usage ?? (index * 0.13) % 0.9) // 根据索引生成不同的测试值
+		: item.model.token_usage;
+	// ========== 自定义功能：模型使用量进度条显示 END ==========
 </script>
 
 <button
 	aria-roledescription="model-item"
 	aria-label={item.label}
-	class="flex group/item w-full text-left font-medium line-clamp-1 select-none items-center rounded-button py-2 pl-3 pr-1.5 text-sm text-gray-700 dark:text-gray-100 outline-hidden transition-all duration-75 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl cursor-pointer data-highlighted:bg-muted {index ===
+	class="flex group/item w-full text-left font-medium line-clamp-1 select-none items-center rounded-button py-2 pl-3 pr-1.5 text-sm text-gray-700 dark:text-gray-100 outline-hidden transition-all duration-75 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl cursor-pointer data-highlighted:bg-muted mb-1 {index ===
 	selectedModelIdx
 		? 'bg-gray-100 dark:bg-gray-800 group-hover:bg-transparent'
-		: ''}"
+		: ''} relative overflow-hidden"
 	data-arrow-selected={index === selectedModelIdx}
 	data-value={item.value}
 	on:click={() => {
 		onClick();
 	}}
 >
-	<div class="flex flex-col flex-1 gap-1.5">
+	<!-- ========== 自定义功能：背景进度条效果 START ========== -->
+	<!-- 功能说明: 根据 token_usage 显示整个条目的背景填充效果 -->
+	<!-- 实现方式:
+		1. 使用绝对定位的 div 作为背景层
+		2. 背景层宽度根据 displayTokenUsage 动态设置（0-100%）
+		3. 使用半透明的蓝色到青色渐变（亮色模式 10% 透明度，暗色模式 20% 透明度）
+		4. 添加过渡动画效果（duration-300）
+		5. 只有当 displayTokenUsage 有值时才显示
+	-->
+	<!-- 样式说明:
+		- button 添加了 relative：为绝对定位的背景层提供定位上下文
+		- button 添加了 overflow-hidden：确保背景层不会溢出圆角边界
+		- button 添加了 mb-1：在条目之间添加间距（0.25rem）
+	-->
+	<!-- 兼容性说明:
+		- 使用内联样式 + rgba() 颜色值以支持老版本浏览器（如 Chrome 106）
+		- 避免使用 Tailwind 的透明度语法（/10, /20）以提高兼容性
+	-->
+	{#if displayTokenUsage !== undefined && displayTokenUsage !== null}
+		<div
+			class="absolute inset-0 transition-all duration-300"
+			style="width: {(displayTokenUsage * 100).toFixed(1)}%; background: linear-gradient(to right, rgba(59, 130, 246, 0.1), rgba(34, 211, 238, 0.1));"
+		></div>
+	{/if}
+	<!-- ========== 自定义功能：背景进度条效果 END ========== -->
+
+	<div class="flex flex-col flex-1 gap-1.5 relative z-10">
 		<!-- {#if (item?.model?.tags ?? []).length > 0}
 			<div
 				class="flex gap-0.5 self-center items-start h-full w-full translate-y-[0.5px] overflow-x-auto scrollbar-none"
@@ -115,6 +164,9 @@
 							</Tooltip>
 						</div>
 					{/if}
+				{/if}
+
+				{#if item.model.owned_by === 'ollama'}
 					{#if item.model.ollama?.expires_at && new Date(item.model.ollama?.expires_at * 1000) > new Date()}
 						<div class="flex items-center translate-y-[0.5px] px-0.5">
 							<Tooltip

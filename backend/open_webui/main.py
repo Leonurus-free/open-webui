@@ -1400,7 +1400,7 @@ async def inspect_websocket(request: Request, call_next):
 app.add_middleware(
     CORSMiddleware,
     allow_origins=CORS_ALLOW_ORIGIN,
-    allow_credentials=False,  # 禁用凭据模式以允许通配符源
+    allow_credentials=True,  # 禁用凭据模式以允许通配符源,当前开启状态
     allow_methods=["*"],
     allow_headers=["*"],
 )

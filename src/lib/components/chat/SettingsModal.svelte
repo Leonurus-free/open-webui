@@ -498,6 +498,10 @@
 				);
 			}
 
+			if (tab.id === 'about') {
+				return $user?.role === 'admin';
+			}
+
 			return true;
 		});
 	};

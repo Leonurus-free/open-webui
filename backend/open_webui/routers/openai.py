@@ -927,6 +927,9 @@ async def generate_chat_completion(
     else:
         request_url = f"{url}/chat/completions"
 
+    # Save the stream parameter before converting payload to JSON
+    is_stream_request = payload.get("stream", False)
+
     payload = json.dumps(payload)
 
     r = None
@@ -949,8 +952,77 @@ async def generate_chat_completion(
         )
 
         # Check if response is SSE
-        if "text/event-stream" in r.headers.get("Content-Type", ""):
+        content_type = r.headers.get("Content-Type", "")
+
+        # Determine if this is a streaming response
+        is_sse_content_type = "text/event-stream" in content_type
+
+        # For APIs with incorrect Content-Type, verify the actual content format
+        if not is_sse_content_type and is_stream_request and r.status == 200:
+            # Content-Type is not text/event-stream, but we requested streaming
+            # Peek at the first chunk to verify if it's actually SSE format
+            log.info(f"Checking if response is SSE (Content-Type: {content_type}, stream requested: {is_stream_request})")
+
+            first_chunk = await r.content.read(100)  # Read first 100 bytes
+
+            # Check if it looks like SSE format (starts with "data: " or "event: " or "id: ")
+            is_sse_format = (
+                first_chunk.startswith(b"data: ") or
+                first_chunk.startswith(b"event: ") or
+                first_chunk.startswith(b"id: ") or
+                b"\ndata: " in first_chunk
+            )
+
+            if is_sse_format:
+                # It's SSE format with wrong Content-Type, fix it!
+                log.info(f"Detected SSE format with incorrect Content-Type '{content_type}', correcting to text/event-stream")
+                is_sse_content_type = True
+                content_type = "text/event-stream"
+
+                # Create an async generator that yields the first chunk, then the rest
+                async def stream_with_first_chunk():
+                    yield first_chunk
+                    async for chunk in stream_chunks_handler(r.content):
+                        yield chunk
+
+                streaming = True
+                # Fix the Content-Type header
+                response_headers = dict(r.headers)
+                response_headers["Content-Type"] = "text/event-stream"
+
+                return StreamingResponse(
+                    stream_with_first_chunk(),
+                    status_code=r.status,
+                    headers=response_headers,
+                    background=BackgroundTask(
+                        cleanup_response, response=r, session=session
+                    ),
+                )
+            else:
+                # Not SSE format, treat as regular JSON response
+                log.debug(f"Response is not SSE format (first bytes: {first_chunk[:50]}), treating as JSON")
+                # Read the rest of the content
+                remaining_content = await r.content.read()
+                full_content = first_chunk + remaining_content
+
+                try:
+                    response = json.loads(full_content.decode('utf-8'))
+                except Exception as e:
+                    log.error(f"Failed to parse response as JSON: {e}")
+                    response = full_content.decode('utf-8', errors='replace')
+
+                if r.status >= 400:
+                    if isinstance(response, (dict, list)):
+                        return JSONResponse(status_code=r.status, content=response)
+                    else:
+                        return PlainTextResponse(status_code=r.status, content=response)
+
+                return response
+
+        # Standard SSE response handling
+        if is_sse_content_type:
             streaming = True
+            log.info(f"Streaming response detected (Content-Type: {content_type})")
             return StreamingResponse(
                 stream_chunks_handler(r.content),
                 status_code=r.status,
@@ -960,10 +1032,11 @@ async def generate_chat_completion(
                 ),
             )
         else:
+            # Non-streaming response
             try:
                 response = await r.json()
             except Exception as e:
-                log.error(e)
+                log.error(f"JSON parsing failed (Content-Type: {content_type}, stream request: {is_stream_request}): {e}")
                 response = await r.text()
 
             if r.status >= 400:
